@@ -5,12 +5,11 @@ import threading
 import logging
 import time
 
-from .serialosc import SerialOSC
+from .serialosc import SerialOSC, serialosc
 
 ARC_HOST = "127.0.0.1"
 ARC_CLIENT_PORT = 13001
 
-serialosc = None
 logger = logging.getLogger(__name__)
 
 
@@ -24,8 +23,7 @@ class Arc:
             serialosc = SerialOSC()
         serialosc.await_devices()
 
-        arc_devices = list(filter(
-            lambda device: device.device_model == "arc", serialosc.available_devices))
+        arc_devices = list(filter(lambda device: device.device_model == "arc", serialosc.available_devices))
         logger.warning("Arc: got devices: %s" % serialosc.available_devices)
         arc_device = arc_devices[0]
         server_port = arc_device.port
@@ -34,15 +32,12 @@ class Arc:
         dispatcher = Dispatcher()
 
         def default_handler(address, *args):
-            logger.warning("Arc: No handler for message: %s %s" %
-                           (address, args))
+            logger.warning("Arc: No handler for message: %s %s" % (address, args))
         dispatcher.map(f"/{self.prefix}/enc/delta", self.handle_ring_enc)
         dispatcher.set_default_handler(default_handler)
 
-        self.server = ThreadingOSCUDPServer(
-            (ARC_HOST, client_port), dispatcher)
-        self.thread = threading.Thread(
-            target=self.server.serve_forever, daemon=True)
+        self.server = ThreadingOSCUDPServer((ARC_HOST, client_port), dispatcher)
+        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
         self.client = SimpleUDPClient(ARC_HOST, server_port)
 
@@ -50,8 +45,7 @@ class Arc:
         self.client.send_message("/sys/port", [client_port])
 
     def ring_set(self, ring: int, led: int, level: int):
-        self.client.send_message(
-            f"/{self.prefix}/ring/set", [ring, led, level])
+        self.client.send_message(f"/{self.prefix}/ring/set", [ring, led, level])
 
     def ring_all(self, ring: int, level: int):
         self.client.send_message(f"/{self.prefix}/ring/all", [ring, level])
@@ -61,8 +55,7 @@ class Arc:
         self.client.send_message(f"/{self.prefix}/ring/map", [ring, *levels])
 
     def ring_range(self, ring: int, x1: int, x2: int, level: int):
-        self.client.send_message(
-            f"/{self.prefix}/ring/range", [ring, x1, x2, level])
+        self.client.send_message(f"/{self.prefix}/ring/range", [ring, x1, x2, level])
 
     def handle_ring_enc(self, address: str, ring: int, delta: int):
         logger.debug("Enc delta: %d, %s" % (ring, delta))
