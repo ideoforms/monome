@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 class Arc:
     def __init__(self,
-                 modes: Union[str, list[str]] = "bipolar",
                  ring_count: int = 4,
                  led_count: int = 64,
                  prefix: str = "monome"):
