@@ -12,6 +12,7 @@ setup(
     author_email = 'dan-code@erase.net',
     url = 'https://github.com/ideoforms/monome',
     packages = ['monome'],
+    install_requires = ['python-osc'],
     keywords = ('audio', 'sound', 'music', 'control', 'monome', 'grid', 'arc'),
     classifiers = [
         'Topic :: Multimedia :: Sound/Audio',

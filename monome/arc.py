@@ -30,14 +30,6 @@ class Arc:
         self.ring_count = ring_count
         self.led_count = led_count
         self.prefix = prefix
-        
-        #--------------------------------------------------------------------------------
-        # Create pages
-        #--------------------------------------------------------------------------------
-        self.pages = []
-        self.pages.append(ArcPage(arc=self,
-                                  modes=modes))
-        self.current_page_index = 0
 
         #--------------------------------------------------------------------------------
         # Initialise SerialOSC connection and locate the first Arc device.
@@ -52,7 +44,7 @@ class Arc:
         server_port = arc_device.port
         client_port = ARC_CLIENT_PORT + arc_client_count
         arc_client_count = arc_client_count + 1
-
+        
         #--------------------------------------------------------------------------------
         # Set up OSC bindings
         #--------------------------------------------------------------------------------
@@ -70,6 +62,15 @@ class Arc:
         self.client = SimpleUDPClient(ARC_HOST, server_port)
 
         self.client.send_message("/sys/port", [client_port])
+
+        #--------------------------------------------------------------------------------
+        # Create pages
+        #--------------------------------------------------------------------------------
+        self.pages = []
+        self.pages.append(ArcPage(arc=self,
+                                  modes=modes))
+        self.current_page_index = 0
+        self.draw_all()
 
     def ring_set(self, ring: int, led: int, level: int):
         self.client.send_message(f"/{self.prefix}/ring/set", [ring, led, level])
@@ -105,7 +106,7 @@ class Arc:
     sensitivity = property(get_sensitivity, set_sensitivity)
 
     def draw_all(self):
-        for ring in range(self.arc.ring_count):
+        for ring in range(self.ring_count):
             self.draw(ring)
 
     def draw(self, ring):
