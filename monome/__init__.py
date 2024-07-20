@@ -1,2 +1,2 @@
-from .arc import Arc
+from .arc import Arc, ArcUI
 from .exceptions import NoDevicesFoundError
