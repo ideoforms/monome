@@ -26,7 +26,7 @@ class ArcUI (Arc):
         self.pages.append(page)
         if len(self.pages) == 1:
             self.current_page_index = 0
-            self.draw_all()
+            self.draw()
         return page
     
     @property
@@ -37,7 +37,7 @@ class ArcUI (Arc):
         if not index in list(range(len(self.pages))):
             raise ValueError("Invalid page index: %d" % index)
         self.current_page_index = index
-        self.draw_all()
+        self.draw()
 
     def handle_osc_ring_enc(self, address: str, ring: int, delta: int):
         logger.debug("Enc delta: %d, %s" % (ring, delta))
@@ -56,13 +56,12 @@ class ArcUI (Arc):
         self.current_page.sensitivity = sensitivity
     sensitivity = property(get_sensitivity, set_sensitivity)
 
-    def draw_all(self):
+    def draw(self):
         if len(self.pages) > 0:
-            for ring in range(self.ring_count):
-                self.draw(ring)
+            self.current_page.draw()
 
-    def draw(self, ring):
-        self.current_page.draw(ring)
+    def draw_ring(self, ring):
+        self.current_page.draw_ring(ring)
 
 
 def main():

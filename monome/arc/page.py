@@ -67,9 +67,13 @@ class ArcPage:
             for handler in self.handlers + self.arc.handlers:
                 handler(ring, angle_radians, delta_radians)
 
-        self.draw(ring)
+        self.draw_ring(ring)
 
-    def draw(self, ring):
+    def draw(self):
+        for ring in range(self.ring_count):
+            self.draw_ring(ring)
+
+    def draw_ring(self, ring):
         if self.modes[ring] == "bipolar":
             position = self.positions[ring]
 
