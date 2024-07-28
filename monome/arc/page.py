@@ -15,14 +15,14 @@ class ArcPage:
         
         self.arc = arc
         if isinstance(modes, str):
-            modes = [modes] * 4
-        if len(modes) != 4:
-            raise ValueError("Modes must contain either 1 or 4 value")
+            modes = [modes] * self.arc.ring_count
+        if len(modes) != self.arc.ring_count:
+            raise ValueError(f"Modes must contain either 1 or {self.arc.ring_count} values")
         for mode in modes:
             if mode not in ["unipolar", "bipolar", "relative", "angular"]:
                 raise ValueError("Invalid ring mode: %s" % mode)
         self.modes = modes
-        self.positions = [0] * 4
+        self.positions = [0] * self.arc.ring_count
         self.sensitivity = 1.0
         self.handlers: list[callable] = []
 
