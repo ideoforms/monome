@@ -16,14 +16,16 @@ class ArcUI (Arc):
         #--------------------------------------------------------------------------------
         # Create pages
         #--------------------------------------------------------------------------------
-        self.pages = []
+        self.pages: list[ArcPage] = []
         self.current_page_index = -1
         self.handlers: list[callable] = []
+        self._sensitivity = 1.0
 
     def add_page(self, modes: Union[str, list[str]] = "bipolar"):
         page = ArcPage(arc=self,
                        modes=modes)
         self.pages.append(page)
+        page.sensitivity = self.sensitivity
         if len(self.pages) == 1:
             self.current_page_index = 0
             self.draw()
@@ -51,9 +53,11 @@ class ArcUI (Arc):
     handler = add_handler
 
     def get_sensitivity(self):
-        return self.current_page.sensitivity
+        return self._sensitivity
     def set_sensitivity(self, sensitivity: float):
-        self.current_page.sensitivity = sensitivity
+        self._sensitivity = sensitivity
+        for page in self.pages:
+            page.sensitivity = sensitivity
     sensitivity = property(get_sensitivity, set_sensitivity)
 
     def draw(self):
