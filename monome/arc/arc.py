@@ -7,7 +7,7 @@ import time
 import math
 import numpy as np
 
-from typing import Union, Callable
+from typing import Callable
 
 from ..serialosc import SerialOSC, serialosc
 
@@ -86,12 +86,12 @@ class Arc:
     def add_handler(self, handler: Callable):
         self.handlers.append(handler)
 
-    def handler(self, handler: callable):
+    def handler(self, handler: Callable):
         """
         Used for the @arc.handler decorator.
 
         Args:
-            handler (callable): The handler to add.
+            handler (Callable): The handler to add.
         """
         self.add_handler(handler)
 
