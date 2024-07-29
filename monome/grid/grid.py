@@ -1,14 +1,8 @@
-from pythonosc.dispatcher import Dispatcher
-from pythonosc.osc_server import ThreadingOSCUDPServer
-from pythonosc.udp_client import SimpleUDPClient
-import threading
 import logging
 import random
 import time
 
-from typing import Callable
-
-from ..serialosc import SerialOSC
+from ..device import MonomeDevice
 
 GRID_HOST = "127.0.0.1"
 GRID_CLIENT_PORT = 14001
@@ -18,7 +12,7 @@ grid_client_count = 0
 logger = logging.getLogger(__name__)
 
 
-class Grid:
+class Grid (MonomeDevice):
     def __init__(self,
                  width: int = 16,
                  height: int = 8,
@@ -31,41 +25,14 @@ class Grid:
             height (int, optional): The number of cells in the Grid's vertical axis. Defaults to 8.
             prefix (str, optional): The OSC prefix. Defaults to "monome".
         """
-        global grid_client_count
+        super().__init__(model_name="one",
+                         prefix=prefix)
 
         self.width = width
         self.height = height
         self.prefix = prefix
-        self.handlers: list[Callable] = []
 
-        #--------------------------------------------------------------------------------
-        # Initialise SerialOSC connection and locate the first Grid device.
-        # Only one Grid is currently supported.
-        #--------------------------------------------------------------------------------
-        serialosc = SerialOSC()
-        serialosc.await_devices()
-
-        grid_devices = list(filter(lambda device: device.device_model == "one", serialosc.available_devices))
-        grid_device = grid_devices[0]
-        server_port = grid_device.port
-        client_port = GRID_CLIENT_PORT + grid_client_count
-        grid_client_count = grid_client_count + 1
-
-        #--------------------------------------------------------------------------------
-        # Set up OSC bindings
-        #--------------------------------------------------------------------------------
-        dispatcher = Dispatcher()
-
-        dispatcher.map(f"/{self.prefix}/grid/key", self._osc_handle_grid_key)
-        dispatcher.map(f"/sys/port", self._osc_handle_sys_port)
-        dispatcher.set_default_handler(self._osc_handle_unknown_message)
-
-        self.server = ThreadingOSCUDPServer((GRID_HOST, client_port), dispatcher)
-        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
-        self.thread.start()
-
-        self.client = SimpleUDPClient(GRID_HOST, server_port)
-        self.client.send_message("/sys/port", [client_port])
+        self.dispatcher.map(f"/{self.prefix}/grid/key", self._osc_handle_grid_key)
 
     #--------------------------------------------------------------------------------
     # led_intensity
@@ -142,22 +109,6 @@ class Grid:
         self.client.send_message(f"/{self.prefix}/grid/led/map", [x, y_offset, *levels])
 
     #--------------------------------------------------------------------------------
-    # Handlers
-    #--------------------------------------------------------------------------------
-
-    def add_handler(self, handler: Callable):
-        self.handlers.append(handler)
-
-    def handler(self, handler: Callable):
-        """
-        Used for the @grid.handler decorator.
-
-        Args:
-            handler (callable): The handler to add.
-        """
-        self.add_handler(handler)
-
-    #--------------------------------------------------------------------------------
     # Validation and packing
     #--------------------------------------------------------------------------------
 
@@ -168,7 +119,7 @@ class Grid:
             raise ValueError(f"y must be between 0 and {self.height - 1}")
         if on not in range(2):
             raise ValueError("level must be either 0 or 1. For variable brightness, use the _level_ methods.")
-        
+
     def _validate_varibright(self, x: int, y: int, level: int):
         if x not in range(self.width):
             raise ValueError(f"x must be between 0 and {self.width - 1}")
@@ -194,12 +145,6 @@ class Grid:
         logger.debug("Key press: %d, %d, %d" % (x, y, down))
         for handler in self.handlers:
             handler(x, y, down)
-
-    def _osc_handle_sys_port(self, address: str, port: int):
-        pass
-
-    def _osc_handle_unknown_message(address, *args):
-        logger.warning("Grid: No handler for message: %s %s" % (address, args))
 
 
 if __name__ == "__main__":
