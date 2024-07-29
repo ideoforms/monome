@@ -65,8 +65,8 @@ class Arc:
     def ring_set(self, ring: int, led: int, level: int):
         self.client.send_message(f"/{self.prefix}/ring/set", [ring, led, level])
 
-    def ring_all(self, level: int):
-        self.client.send_message(f"/{self.prefix}/ring/all", [level])
+    def ring_all(self, ring: int, level: int):
+        self.client.send_message(f"/{self.prefix}/ring/all", [ring, level])
 
     def ring_map(self, ring: int, levels: list[int]):
         # Cast other iterables to a Python list
@@ -102,10 +102,8 @@ class Arc:
 if __name__ == "__main__":
     arc = Arc()
 
-    positions = []
     for ring in range(4):
         arc.ring_all(ring, 0)
-        positions.append(0)
 
     @arc.handler
     def arc_handler(ring, delta):
