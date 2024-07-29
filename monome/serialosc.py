@@ -76,19 +76,19 @@ class SerialOSC:
         logger.warning("SerialOSC: No handler for message: %s %s" % (address, args))
 
     def _osc_handle_device_listed(self, address, device_id, device_model, port):
-        logger.warning("Found serial OSC device: %s (model %s, port %d)" % (device_id, device_model, port))
+        logger.info("Discovered serial OSC device: %s (model %s, port %d)" % (device_id, device_model, port))
         device = DeviceSpec(device_id, device_model, port)
         self.available_devices.append(device)
         self._serialosc_register()
 
     def _osc_handle_device_added(self, address, device_id, device_model, port):
-        logger.warning("Added serial OSC device: %s (model %s, port %d)" % (device_id, device_model, port))
+        logger.info("Added serial OSC device: %s (model %s, port %d)" % (device_id, device_model, port))
         device = DeviceSpec(device_id, device_model, port)
         self.available_devices.remove(device)
         self._serialosc_register()
 
     def _osc_handle_device_removed(self, address, device_id, device_model, port):
-        logger.warning("Removed serial OSC device: %s (model %s, port %d)" % (device_id, device_model, port))
+        logger.info("Removed serial OSC device: %s (model %s, port %d)" % (device_id, device_model, port))
         device = DeviceSpec(device_id, device_model, port)
         self.available_devices.remove(device)
         self._serialosc_register()

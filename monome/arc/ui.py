@@ -1,6 +1,6 @@
 import logging
 
-from typing import Union, Callable
+from typing import Union
 from .page import ArcPage
 from .arc import Arc
 

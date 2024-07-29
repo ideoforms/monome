@@ -1,8 +1,4 @@
-from pythonosc.dispatcher import Dispatcher
-from pythonosc.osc_server import ThreadingOSCUDPServer
-from pythonosc.udp_client import SimpleUDPClient
 import numpy as np
-import threading
 import logging
 import time
 import math
