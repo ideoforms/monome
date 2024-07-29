@@ -9,7 +9,7 @@ import numpy as np
 
 from typing import Callable
 
-from ..serialosc import SerialOSC, serialosc
+from ..serialosc import SerialOSC
 
 ARC_HOST = "127.0.0.1"
 ARC_CLIENT_PORT = 13001
@@ -24,7 +24,6 @@ class Arc:
                  ring_count: int = 4,
                  led_count: int = 64,
                  prefix: str = "monome"):
-        global serialosc
         global arc_client_count
 
         self.ring_count = ring_count
@@ -36,8 +35,7 @@ class Arc:
         # Initialise SerialOSC connection and locate the first Arc device.
         # Only one Arc is currently supported.
         #--------------------------------------------------------------------------------
-        if serialosc is None:
-            serialosc = SerialOSC()
+        serialosc = SerialOSC()
         serialosc.await_devices()
 
         arc_devices = list(filter(lambda device: device.device_model == "arc", serialosc.available_devices))
@@ -67,8 +65,8 @@ class Arc:
     def ring_set(self, ring: int, led: int, level: int):
         self.client.send_message(f"/{self.prefix}/ring/set", [ring, led, level])
 
-    def ring_all(self, ring: int, level: int):
-        self.client.send_message(f"/{self.prefix}/ring/all", [ring, level])
+    def ring_all(self, level: int):
+        self.client.send_message(f"/{self.prefix}/ring/all", [level])
 
     def ring_map(self, ring: int, levels: list[int]):
         # Cast other iterables to a Python list

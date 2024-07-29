@@ -11,7 +11,7 @@ from typing import Callable
 from ..serialosc import SerialOSC, serialosc
 
 GRID_HOST = "127.0.0.1"
-GRID_CLIENT_PORT = 13001
+GRID_CLIENT_PORT = 14001
 
 grid_client_count = 0
 
@@ -31,7 +31,6 @@ class Grid:
             height (int, optional): The number of cells in the Grid's vertical axis. Defaults to 8.
             prefix (str, optional): The OSC prefix. Defaults to "monome".
         """
-        global serialosc
         global grid_client_count
 
         self.width = width
@@ -43,8 +42,7 @@ class Grid:
         # Initialise SerialOSC connection and locate the first Grid device.
         # Only one Grid is currently supported.
         #--------------------------------------------------------------------------------
-        if serialosc is None:
-            serialosc = SerialOSC()
+        serialosc = SerialOSC()
         serialosc.await_devices()
 
         grid_devices = list(filter(lambda device: device.device_model == "one", serialosc.available_devices))

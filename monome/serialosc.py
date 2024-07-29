@@ -1,6 +1,7 @@
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import ThreadingOSCUDPServer
 from pythonosc.udp_client import SimpleUDPClient
+from singleton_decorator import singleton
 from dataclasses import dataclass
 import threading
 import datetime
@@ -14,7 +15,6 @@ SERIALOSC_SERVER_PORT = 12002
 SERIALOSC_CLIENT_PORT = 12003
 ARC_CLIENT_PORT = 13001
 
-serialosc = None
 logger = logging.getLogger(__name__)
 
 
@@ -30,7 +30,11 @@ class DeviceSpec:
         self.device_model = parts[1]
         self.device_version = parts[2] if len(parts) >= 3 else None
 
+#--------------------------------------------------------------------------------
+# SerialOSC is a singleton class, with one instance shared across all clients.
+#--------------------------------------------------------------------------------
 
+@singleton
 class SerialOSC:
     def __init__(self):
         dispatcher = Dispatcher()
