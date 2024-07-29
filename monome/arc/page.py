@@ -104,3 +104,7 @@ class ArcPage:
             display = [0] * self.led_count
             display[position] = self.led_intensity_cursor
             self.arc.ring_map(ring, display)
+
+    def set_position(self, ring: int, position: int):
+        self.positions[ring] = position
+        self.draw_ring(ring)
