@@ -29,8 +29,12 @@ Connect your monome device via USB. To test that the library works:
 
 ```sh
 # run a test sequence on a grid, responding to button presses
-python3 -m monome monome.grid.grid 
+python3 -m monome.grid.grid 
 
 # run a test sequence on an arc, responding to ring rotations
-python3 -m monome monome.arc.arc 
+python3 -m monome.arc.arc 
 ```
+
+## Examples
+
+Further examples are available in [examples](examples).
