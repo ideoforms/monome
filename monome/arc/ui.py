@@ -40,13 +40,7 @@ class ArcUI (Arc):
             raise ValueError("Invalid page index: %d" % index)
         self.current_page_index = index
         self.draw()
-
-    def add_handler(self, callback: Callable):
-        self.handlers.append(callback)
-
-    # Synonym to enable @arcui.handler decorator
-    handler = add_handler
-
+    
     def get_sensitivity(self):
         return self._sensitivity
 
@@ -65,6 +59,9 @@ class ArcUI (Arc):
         self.current_page.draw_ring(ring)
 
     def _osc_handle_ring_enc(self, address: str, ring: int, delta: int):
+        """
+        Override the default OSC handler, and forward it to the current page.
+        """
         logger.debug("Ring encoder delta: %d, %s" % (ring, delta))
         self.current_page._handle_ring_enc(ring, delta)
 
@@ -81,15 +78,15 @@ if __name__ == "__main__":
 
     @arcui_bi.handler
     def _(ring, position, delta):
-        print("Bi handler: ring = %d, position = %f, delta = %f" % (ring, position, delta))
+        print("Bipolar handler: ring = %d, position = %f, delta = %f" % (ring, position, delta))
 
     @arcui_uni.handler
     def _(ring, position, delta):
-        print("Uni handler: ring = %d, position = %f, delta = %f" % (ring, position, delta))
+        print("Unipolar handler: ring = %d, position = %f, delta = %f" % (ring, position, delta))
 
     @arcui_ang.handler
     def _(ring, position, delta):
-        print("Ang handler: ring = %d, position = %f, delta = %f" % (ring, position, delta))
+        print("Angular handler: ring = %d, position = %f, delta = %f" % (ring, position, delta))
 
     while True:
         try:
