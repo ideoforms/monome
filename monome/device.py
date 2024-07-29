@@ -60,6 +60,12 @@ class MonomeDevice:
     #--------------------------------------------------------------------------------
 
     def add_handler(self, handler: Callable):
+        """
+        Add a handler to receive events from the device.
+
+        Args:
+            handler (Callable): A function that is called when an event is received.
+        """
         self.handlers.append(handler)
 
     def handler(self, handler: Callable):

@@ -35,24 +35,95 @@ class Arc (MonomeDevice):
         #--------------------------------------------------------------------------------
         self.dispatcher.map(f"/{self.prefix}/enc/delta", self._osc_handle_ring_enc)
 
-    def ring_set(self, ring: int, led: int, level: int):
+    #--------------------------------------------------------------------------------
+    # Public methods
+    #--------------------------------------------------------------------------------
+
+    def ring_set(self, ring: int, led: int, level: int) -> None:
+        """
+        Set an individual LED to the specified brightness level.
+
+        Args:
+            ring (int): The index of the ring. Must be less than `ring_count`.
+            led (int): The index of the LED. Must be less than `led_count`.
+            level (int): The level to set. Must be between 0 and 15.
+        """
+        self._validate(ring, led, level)
         self.client.send_message(f"/{self.prefix}/ring/set", [ring, led, level])
 
-    def ring_all(self, ring: int, level: int):
+    def ring_range(self, ring: int, x1: int, x2: int, level: int):
+        """
+        Set a range of LEDs to the specified brightness level.
+
+        Args:
+            ring (int): The index of the ring. Must be less than `ring_count`.
+            x1 (int): The starting index of the LED range. Must be less than `led_count`.
+            x2 (int): The ending index of the LED range. Must be less than `led_count`.
+            level (int): The level to set. Must be between 0 and 15.
+        """
+        for led in range(x1, x2):
+            self._validate(ring, led, level)
+        self.client.send_message(f"/{self.prefix}/ring/range", [ring, x1, x2, level])
+
+    def ring_all(self, ring: int, level: int) -> None:
+        """
+        Set all of a ring's LEDs to the specified brightness level.
+
+        Args:
+            ring (int): The index of the ring. Must be less than `ring_count`.
+            level (int): The level to set. Must be between 0 and 15.
+        """
+        self._validate(ring, None, level)
         self.client.send_message(f"/{self.prefix}/ring/all", [ring, level])
 
     def ring_map(self, ring: int, levels: list[int]):
-        # Cast other iterables to a Python list
+        """
+        Set the ring's LED values to the list of brightness values in `levels`.
+
+        Args:
+            ring (int): The index of the ring. Must be less than `ring_count`.
+            levels (int): The list of levels to set. Must be the same length as `led_count`.
+        """
+
+        if len(levels) != self.led_count:
+            raise ValueError("The number of levels specified must be equal to the ring's led_count (%d != %d)" % (len(levels), self.led_count))
+        for level in levels:
+            self._validate(ring, None, level)
+
+        # Cast numpy array to a Python list
         if isinstance(levels, np.ndarray):
             levels = levels.tolist()
-        assert len(levels) == 64
+
         self.client.send_message(f"/{self.prefix}/ring/map", [ring, *levels])
 
-    def ring_range(self, ring: int, x1: int, x2: int, level: int):
-        self.client.send_message(f"/{self.prefix}/ring/range", [ring, x1, x2, level])
+    #--------------------------------------------------------------------------------
+    # Validation
+    #--------------------------------------------------------------------------------
+
+    def _validate(self, ring: int, led: int, level: int):
+        if ring < 0 or ring >= self.ring_count:
+            raise ValueError("Invalid ring index. Must be between 0 and %d" % (self.ring_count - 1))
+        if led is not None and (led < 0 or led >= self.led_count):
+            raise ValueError("Invalid LED index. Must be between 0 and %d" % (self.led_count - 1))
+        if level < 0 or level > 15:
+            raise ValueError("Invalid brightness level. Must be between 0 and 15")
+
+    #--------------------------------------------------------------------------------
+    # Handlers
+    #--------------------------------------------------------------------------------
+
+    def add_handler(self, handler: Callable):
+        """
+        Add a handler to receive events from the Arc.
+
+        Args:
+            handler (Callable): A function that is called when a rotation event is detected.
+                                Must have the signature: method(ring: int, delta: int)
+        """
+        super().add_handler(handler)
 
     def _osc_handle_ring_enc(self, address: str, ring: int, delta: int):
-        logger.debug("Enc delta: %d, %s" % (ring, delta))
+        logger.debug("Ring encoder event received: ring %d, delta %d" % (ring, delta))
         for handler in self.handlers:
             handler(ring, delta)
 
