@@ -8,7 +8,7 @@ import time
 
 from typing import Callable
 
-from ..serialosc import SerialOSC, serialosc
+from ..serialosc import SerialOSC
 
 GRID_HOST = "127.0.0.1"
 GRID_CLIENT_PORT = 14001
