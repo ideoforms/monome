@@ -45,7 +45,7 @@ class Arc:
         server_port = arc_device.port
         client_port = ARC_CLIENT_PORT + arc_client_count
         arc_client_count = arc_client_count + 1
-        
+
         #--------------------------------------------------------------------------------
         # Set up OSC bindings
         #--------------------------------------------------------------------------------
@@ -53,8 +53,8 @@ class Arc:
 
         def default_handler(address, *args):
             logger.warning("Arc: No handler for message: %s %s" % (address, args))
-        dispatcher.map(f"/{self.prefix}/enc/delta", self.handle_osc_ring_enc)
-        dispatcher.map(f"/sys/port", self.handle_sys_port)
+        dispatcher.map(f"/{self.prefix}/enc/delta", self._osc_handle_ring_enc)
+        dispatcher.map(f"/sys/port", self._osc_handle_sys_port)
         dispatcher.set_default_handler(default_handler)
 
         self.server = ThreadingOSCUDPServer((ARC_HOST, client_port), dispatcher)
@@ -80,7 +80,7 @@ class Arc:
     def ring_range(self, ring: int, x1: int, x2: int, level: int):
         self.client.send_message(f"/{self.prefix}/ring/range", [ring, x1, x2, level])
 
-    def handle_sys_port(self, address: str, port: int):
+    def _osc_handle_sys_port(self, address: str, port: int):
         pass
 
     def add_handler(self, handler: Callable):
@@ -95,13 +95,13 @@ class Arc:
         """
         self.add_handler(handler)
 
-    def handle_osc_ring_enc(self, address: str, ring: int, delta: int):
+    def _osc_handle_ring_enc(self, address: str, ring: int, delta: int):
         logger.debug("Enc delta: %d, %s" % (ring, delta))
         for handler in self.handlers:
             handler(ring, delta)
 
 
-def main():
+if __name__ == "__main__":
     arc = Arc()
 
     positions = []
@@ -121,7 +121,3 @@ def main():
 
     while True:
         time.sleep(1)
-
-
-if __name__ == "__main__":
-    main()

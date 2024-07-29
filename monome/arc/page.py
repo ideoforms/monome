@@ -1,6 +1,6 @@
+import numpy as np
 import logging
 import math
-import numpy as np
 
 from typing import Union, Callable
 from .arc import Arc
@@ -12,7 +12,7 @@ class ArcPage:
     def __init__(self,
                  arc: Arc,
                  modes: Union[str, list[str]] = "bipolar"):
-        
+
         self.arc = arc
         if isinstance(modes, str):
             modes = [modes] * self.arc.ring_count
@@ -24,7 +24,7 @@ class ArcPage:
         self.modes = modes
         self.positions = [0] * self.arc.ring_count
         self.sensitivity = 1.0
-        self.handlers: list[callable] = []
+        self.handlers: list[Callable] = []
 
         self.led_intensity_fill = 4
         self.led_intensity_cursor = 15
@@ -39,11 +39,11 @@ class ArcPage:
 
     def add_handler(self, callback: Callable):
         self.handlers.append(callback)
-    
+
     # Synonym to enable @arcpage.handler decorator
     handler = add_handler
 
-    def handle_ring_enc(self, ring: int, delta: int):
+    def _handle_ring_enc(self, ring: int, delta: int):
         logger.debug("Enc delta: %d, %s" % (ring, delta))
         delta = delta * self.sensitivity
         delta = int(math.ceil(delta) if delta > 0 else math.floor(delta))

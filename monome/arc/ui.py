@@ -1,8 +1,8 @@
 import logging
 
 from typing import Union, Callable
-from .arc import Arc
 from .page import ArcPage
+from .arc import Arc
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 class ArcUI (Arc):
     def __init__(self,
                  ring_count: int = 4,
-                 led_count: int = 64):
+                 led_count: int = 64,
+                 sensitivity: float = 1.0):
         super().__init__(ring_count, led_count)
 
         #--------------------------------------------------------------------------------
@@ -18,8 +19,7 @@ class ArcUI (Arc):
         #--------------------------------------------------------------------------------
         self.pages: list[ArcPage] = []
         self.current_page_index = -1
-        self.handlers: list[callable] = []
-        self._sensitivity = 1.0
+        self._sensitivity = sensitivity
 
     def add_page(self, modes: Union[str, list[str]] = "bipolar"):
         page = ArcPage(arc=self,
@@ -30,21 +30,16 @@ class ArcUI (Arc):
             self.current_page_index = 0
             self.draw()
         return page
-    
+
     @property
     def current_page(self):
         return self.pages[self.current_page_index]
-    
+
     def set_current_page(self, index: int):
         if not index in list(range(len(self.pages))):
             raise ValueError("Invalid page index: %d" % index)
         self.current_page_index = index
         self.draw()
-
-    def handle_osc_ring_enc(self, address: str, ring: int, delta: int):
-        logger.debug("Enc delta: %d, %s" % (ring, delta))
-        
-        self.current_page.handle_ring_enc(ring, delta)
 
     def add_handler(self, callback: Callable):
         self.handlers.append(callback)
@@ -54,10 +49,12 @@ class ArcUI (Arc):
 
     def get_sensitivity(self):
         return self._sensitivity
+
     def set_sensitivity(self, sensitivity: float):
         self._sensitivity = sensitivity
         for page in self.pages:
             page.sensitivity = sensitivity
+
     sensitivity = property(get_sensitivity, set_sensitivity)
 
     def draw(self):
@@ -67,13 +64,16 @@ class ArcUI (Arc):
     def draw_ring(self, ring):
         self.current_page.draw_ring(ring)
 
+    def _osc_handle_ring_enc(self, address: str, ring: int, delta: int):
+        logger.debug("Ring encoder delta: %d, %s" % (ring, delta))
+        self.current_page._handle_ring_enc(ring, delta)
 
-def main():
-    arcui = ArcUI()
+
+if __name__ == "__main__":
+    arcui = ArcUI(sensitivity=0.25)
     arcui_bi = arcui.add_page("bipolar")
     arcui_uni = arcui.add_page("unipolar")
     arcui_ang = arcui.add_page("angular")
-    arcui.sensitivity = 0.25
 
     @arcui.handler
     def _(ring, position, delta):
@@ -91,7 +91,6 @@ def main():
     def _(ring, position, delta):
         print("Ang handler: ring = %d, position = %f, delta = %f" % (ring, position, delta))
 
-
     while True:
         try:
             page_index = input("Enter page number [012]$ ")
@@ -102,7 +101,3 @@ def main():
             print("Exiting...")
             print(e)
             break
-
-
-if __name__ == "__main__":
-    main()
