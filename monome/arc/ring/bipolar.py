@@ -1,5 +1,6 @@
 from .base import ArcRing
 from ..page import ArcPage
+from ...utils import round_to_integer
 import math
 
 class ArcRingBipolar (ArcRing):
@@ -8,14 +9,16 @@ class ArcRingBipolar (ArcRing):
         self.position = 0
 
     def draw(self):
-        ones = int(math.fabs(self.position))
+        position = round_to_integer(self.position)
+        
+        ones = int(math.fabs(position))
         ones = min(ones, self.led_count)
         zeros = self.led_count - ones
-        if self.position > 0:
+        if position > 0:
             buf = ([self.led_intensity_fill] * ones) + ([0] * zeros)
         else:
             buf = ([0] * zeros) + ([self.led_intensity_fill] * ones)
-        buf[self.position % self.led_count] = self.led_intensity_cursor
+        buf[position % self.led_count] = self.led_intensity_cursor
         self.arc.ring_map(self.index, buf)
 
     def _handle_ring_enc(self, delta: int):

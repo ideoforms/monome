@@ -1,5 +1,6 @@
 from .base import ArcRing
 from ..page import ArcPage
+from ...utils import round_to_integer
 import math
 import numpy as np
 
@@ -9,7 +10,7 @@ class ArcRingUnipolar (ArcRing):
         self.position = 0
 
     def draw(self):
-        position = self.position
+        position = round_to_integer(self.position)
 
         ones = int(math.fabs(position))
         ones = min(ones, self.led_count)

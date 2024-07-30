@@ -83,7 +83,7 @@ if __name__ == "__main__":
     arcui_uni = arcui.add_page("unipolar")
     arcui_ang = arcui.add_page("angular")
     arcui_reel = arcui.add_page("reel")
-    arcui_reel.sensitivity = 0.01
+    arcui_reel.sensitivity = 0.1
 
     @arcui.handler
     def _(ring, position, delta):

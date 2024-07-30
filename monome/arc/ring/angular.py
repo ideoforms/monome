@@ -1,5 +1,6 @@
 from .base import ArcRing
 from ..page import ArcPage
+from ...utils import round_to_integer
 import numpy as np
 
 class ArcRingAngular (ArcRing):
@@ -8,7 +9,8 @@ class ArcRingAngular (ArcRing):
         self.position = 0
 
     def draw(self):
-        position = self.position
+        position = round_to_integer(self.position)
+        
         display = [0] * self.led_count
         display[position] = self.led_intensity_cursor
         self.arc.ring_map(self.index, display)

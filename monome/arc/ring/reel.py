@@ -11,8 +11,9 @@ class ArcRingReel (ArcRing):
         if self.arc.current_page != self.page:
             return
         
-        quarter_offset = self.led_count // 3
         position = round_to_integer(self.position)
+
+        quarter_offset = self.led_count // 3
         display = [0] * self.led_count
         display[(position + 0 * quarter_offset) % self.led_count] = self.led_intensity_cursor
         display[(position + 1 * quarter_offset) % self.led_count] = self.led_intensity_cursor
