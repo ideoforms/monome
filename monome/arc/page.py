@@ -1,4 +1,3 @@
-import numpy as np
 import logging
 import math
 
@@ -13,15 +12,30 @@ class ArcPage:
                  arc: Arc,
                  modes: Union[str, list[str]] = "bipolar"):
 
+        from .ring import ArcRingBipolar, ArcRingAngular, ArcRingUnipolar
+
         self.arc = arc
         if isinstance(modes, str):
             modes = [modes] * self.arc.ring_count
         if len(modes) != self.arc.ring_count:
             raise ValueError(f"Modes must contain either 1 or {self.arc.ring_count} values")
+
+        ring_class_index = {
+            "bipolar": ArcRingBipolar,
+            "unipolar": ArcRingUnipolar,
+            "angular": ArcRingAngular
+        }
+
         for mode in modes:
-            if mode not in ["unipolar", "bipolar", "relative", "angular"]:
+            if mode not in ring_class_index.keys():
                 raise ValueError("Invalid ring mode: %s" % mode)
+
         self.modes = modes
+        self.rings = []
+        for index, mode in enumerate(self.modes):
+            ring = ring_class_index[mode](self, index)
+            self.rings.append(ring)
+
         self.positions = [0] * self.arc.ring_count
         self.sensitivity = 1.0
         self.handlers: list[Callable] = []
@@ -56,24 +70,7 @@ class ArcPage:
         delta = delta * self.sensitivity
         delta = int(math.ceil(delta) if delta > 0 else math.floor(delta))
 
-        if self.modes[ring] == "bipolar":
-            self.positions[ring] += delta
-            for handler in self.handlers + self.arc.handlers:
-                handler(ring, self.positions[ring], delta)
-        elif self.modes[ring] == "unipolar":
-            self.positions[ring] += delta
-            if self.positions[ring] < 0:
-                self.positions[ring] = 0
-            if self.positions[ring] > self.led_count:
-                self.positions[ring] = self.led_count
-            for handler in self.handlers + self.arc.handlers:
-                handler(ring, self.positions[ring], delta)
-        elif self.modes[ring] == "angular":
-            self.positions[ring] = (self.positions[ring] + delta) % self.led_count
-            delta_radians = (np.pi * 2) * (delta / self.led_count)
-            angle_radians = (np.pi * 2) * (self.positions[ring] / self.led_count)
-            for handler in self.handlers + self.arc.handlers:
-                handler(ring, angle_radians, delta_radians)
+        self.rings[ring]._handle_ring_enc(delta)
 
         self.draw_ring(ring)
 
@@ -82,36 +79,7 @@ class ArcPage:
             self.draw_ring(ring)
 
     def draw_ring(self, ring):
-        if self.modes[ring] == "bipolar":
-            position = self.positions[ring]
-
-            ones = int(math.fabs(position))
-            ones = min(ones, self.led_count)
-            zeros = self.led_count - ones
-            if position > 0:
-                buf = ([self.led_intensity_fill] * ones) + ([0] * zeros)
-            else:
-                buf = ([0] * zeros) + ([self.led_intensity_fill] * ones)
-            buf[position % self.led_count] = self.led_intensity_cursor
-            self.arc.ring_map(ring, buf)
-        elif self.modes[ring] == "unipolar":
-            position = self.positions[ring]
-
-            ones = int(math.fabs(position))
-            ones = min(ones, self.led_count)
-            zeros = self.led_count - ones
-            if position > 0:
-                buf = ([self.led_intensity_fill] * ones) + ([0] * zeros)
-            else:
-                buf = ([0] * zeros) + ([self.led_intensity_fill] * ones)
-            buf[position % self.led_count] = self.led_intensity_cursor
-            buf = np.roll(buf, self.led_count // 2)
-            self.arc.ring_map(ring, buf)
-        elif self.modes[ring] == "angular":
-            position = self.positions[ring]
-            display = [0] * self.led_count
-            display[position] = self.led_intensity_cursor
-            self.arc.ring_map(ring, display)
+        self.rings[ring].draw()
 
     def set_position(self, ring: int, position: int):
         self.positions[ring] = position
