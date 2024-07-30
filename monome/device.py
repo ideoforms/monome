@@ -7,6 +7,7 @@ import logging
 from typing import Callable
 
 from .serialosc import SerialOSC
+from .exceptions import NoDevicesFoundError
 
 MONOME_HOST = "127.0.0.1"
 MONOME_CLIENT_PORT = 14001
@@ -38,7 +39,10 @@ class MonomeDevice:
         monome_client_count = monome_client_count + 1
 
         available_devices = list(filter(lambda device: device.device_model == model_name, serialosc.available_devices))
-        device = available_devices[0]
+        try:
+            device = available_devices[0]
+        except IndexError:
+            raise NoDevicesFoundError("No matching monome devices found")
         server_port = device.port
 
         #--------------------------------------------------------------------------------
