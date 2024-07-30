@@ -21,6 +21,17 @@ class ArcUI (Arc):
         self.current_page_index = -1
         self._sensitivity = sensitivity
 
+        from .ring import ArcRingBipolar, ArcRingAngular, ArcRingUnipolar, ArcRingReel
+
+        self.ring_classes = {}
+        self.register_ring_class("bipolar", ArcRingBipolar)
+        self.register_ring_class("unipolar", ArcRingUnipolar)
+        self.register_ring_class("angular", ArcRingAngular)
+        self.register_ring_class("reel", ArcRingReel)
+
+    def register_ring_class(self, name: str, cls: type):
+        self.ring_classes[name] = cls
+
     def add_page(self, modes: Union[str, list[str]] = "bipolar"):
         page = ArcPage(arc=self,
                        modes=modes)
@@ -71,6 +82,8 @@ if __name__ == "__main__":
     arcui_bi = arcui.add_page("bipolar")
     arcui_uni = arcui.add_page("unipolar")
     arcui_ang = arcui.add_page("angular")
+    arcui_reel = arcui.add_page("reel")
+    arcui_reel.sensitivity = 0.01
 
     @arcui.handler
     def _(ring, position, delta):
@@ -88,9 +101,19 @@ if __name__ == "__main__":
     def _(ring, position, delta):
         print("Angular handler: ring = %d, position = %f, delta = %f" % (ring, position, delta))
 
+    import threading, time
+    def runloop():
+        while True:
+            time.sleep(0.05)
+            for ring in arcui_reel.rings:
+                ring.position += 1
+                ring.draw()
+    thread = threading.Thread(target=runloop, daemon=True)
+    thread.start()
+
     while True:
         try:
-            page_index = input("Enter page number [012]$ ")
+            page_index = input("Enter page number [0123]$ ")
             print(page_index)
             page_index = int(page_index.strip())
             arcui.set_current_page(page_index)
