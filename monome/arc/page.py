@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import math
 
 from typing import Union, Callable, TYPE_CHECKING
 if TYPE_CHECKING:
@@ -31,7 +30,6 @@ class ArcPage:
             ring = self.arc.ring_classes[mode](self, index)
             self.rings.append(ring)
 
-        self.positions = [0] * self.arc.ring_count
         self.sensitivity = 1.0
         self.handlers: list[Callable] = []
 
@@ -75,7 +73,3 @@ class ArcPage:
 
     def draw_ring(self, ring):
         self.rings[ring].draw()
-
-    def set_position(self, ring: int, position: int):
-        self.positions[ring] = position
-        self.draw_ring(ring)
