@@ -1,7 +1,7 @@
 import time
 import logging
 
-from .page import GridPage
+from .page import GridPage, GridPageKeyboard, GridPageScaleMatrix
 from .grid import Grid
 
 logger = logging.getLogger(__name__)
@@ -19,8 +19,14 @@ class GridUI (Grid):
         self.pages: list[GridPage] = []
         self.current_page_index = -1
 
+        self.led_intensity_high = 15
+        self.led_intensity_medium = 10
+        self.led_intensity_low = 5
+
         self.page_classes = {}
         self.register_page_class("buttons", GridPageButtons)
+        self.register_page_class("keyboard", GridPageKeyboard)
+        self.register_page_class("scale_matrix", GridPageScaleMatrix)
 
     def register_page_class(self, name: str, cls: type):
         self.page_classes[name] = cls
@@ -57,15 +63,18 @@ class GridUI (Grid):
 
 if __name__ == "__main__":
     grid = GridUI()
-    page = grid.add_page("buttons")
+    page = grid.add_page("scale_matrix")
+    @page.handler
+    def _(note, down):
+        print(note)
 
-    @page.handler_for_key(0, 0)
-    def _(x, y, down):
-        print(x, y, down)
+    # @page.handler_for_key(0, 0)
+    # def _(x, y, down):
+    #     print(x, y, down)
     
-    @page.handler_for_key(4, 0)
-    def _(x, y, down):
-        print(x, y, down)
+    # @page.handler_for_key(4, 0)
+    # def _(x, y, down):
+    #     print(x, y, down)
 
     while True:
         time.sleep(1)

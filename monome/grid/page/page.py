@@ -4,7 +4,7 @@ import logging
 
 from typing import Callable, TYPE_CHECKING
 if TYPE_CHECKING:
-    from .ui import GridUI
+    from ..ui import GridUI
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,8 @@ class GridPage:
 
     def add_handler(self, callback: Callable):
         self.handlers.append(callback)
+    
+    handler = add_handler
 
     def handler_for_key(self, handler_x: int, handler_y: int, handler_down: int = None):
         self.grid.led_level_set(handler_x, handler_y, 5)

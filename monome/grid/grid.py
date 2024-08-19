@@ -78,12 +78,22 @@ class Grid (MonomeDevice):
     def led_row(self, x_offset: int, y: int, on: list[int]):
         for value in on:
             self._validate_binary(x_offset, y, value)
+
+        # For convenience, pad missing trailing entries with zeroes
+        if len(on) < self.width:
+            on = on + [0] * (self.width - len(on))
         values_packed = self._pack_binary(on)
+
         self.client.send_message(f"/{self.prefix}/grid/led/row", [x_offset, y, *values_packed])
 
     def led_level_row(self, x_offset: int, y: int, levels: list[int]):
         for level in levels:
             self._validate_varibright(x_offset, y, level)
+
+        # For convenience, pad missing trailing entries with zeroes
+        if len(levels) < self.width:
+            levels = levels + [0] * (self.width - len(levels))
+
         self.client.send_message(f"/{self.prefix}/grid/led/level/row", [x_offset, y, *levels])
 
     #--------------------------------------------------------------------------------
