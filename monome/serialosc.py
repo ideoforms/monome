@@ -26,7 +26,7 @@ class DeviceSpec:
 
     def __post_init__(self):
         parts = self.device_type.split(" ")
-        self.device_manufacturor = parts[0]
+        self.device_manufacturer = parts[0]
         self.device_model = parts[1]
         self.device_version = parts[2] if len(parts) >= 3 else None
 
