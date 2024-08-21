@@ -42,7 +42,7 @@ class GridPageKeyboard (GridPage):
             else:
                 self.grid.led_level_set(x, y, self.grid.led_intensity_low)
             for handler in self.handlers:
-                handler(self.grid, note, down)
+                handler(note, down)
 
         # Final row is octave up/down
         elif y == self.grid.height - 1:

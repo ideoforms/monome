@@ -1,13 +1,10 @@
 import time
 import logging
 
-from .page import GridPage, GridPageKeyboard, GridPageScaleMatrix
+from .page import GridPage, GridPageKeyboard, GridPageScaleMatrix, GridPageButtons
 from .grid import Grid
 
 logger = logging.getLogger(__name__)
-
-class GridPageButtons (GridPage):
-    pass
 
 class GridUI (Grid):
     def __init__(self):
@@ -62,19 +59,5 @@ class GridUI (Grid):
 
 
 if __name__ == "__main__":
-    grid = GridUI()
-    page = grid.add_page("scale_matrix")
-    @page.handler
-    def _(note, down):
-        print(note)
-
-    # @page.handler_for_key(0, 0)
-    # def _(x, y, down):
-    #     print(x, y, down)
-    
-    # @page.handler_for_key(4, 0)
-    # def _(x, y, down):
-    #     print(x, y, down)
-
     while True:
         time.sleep(1)

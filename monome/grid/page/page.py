@@ -32,16 +32,6 @@ class GridPage:
     
     handler = add_handler
 
-    def handler_for_key(self, handler_x: int, handler_y: int, handler_down: int = None):
-        self.grid.led_level_set(handler_x, handler_y, 5)
-        def wrapper(callback):
-            def grid_handler(x: int, y: int, down: int):
-                if x == handler_x and y == handler_y and (handler_down is None or handler_down == down):
-                    callback(x, y, down)
-                    self.grid.led_level_set(x, y, down * 5 + 5)
-            self.add_handler(grid_handler)
-        return wrapper
-
     def _handle_grid_key(self, x: int, y: int, down: int):
         logger.debug("Grid key: %d, %d, %s" % (x, y, down))
         for handler in self.handlers:
