@@ -12,8 +12,6 @@ from .exceptions import NoDevicesFoundError
 
 SERIALOSC_HOST = "127.0.0.1"
 SERIALOSC_SERVER_PORT = 12002
-SERIALOSC_CLIENT_PORT = 12003
-ARC_CLIENT_PORT = 13001
 
 logger = logging.getLogger(__name__)
 
@@ -44,12 +42,16 @@ class SerialOSC:
         dispatcher.map("/serialosc/remove", self._osc_handle_device_removed)
         dispatcher.set_default_handler(self._osc_handle_unknown_message)
 
-        self.server = ThreadingOSCUDPServer((SERIALOSC_HOST, SERIALOSC_CLIENT_PORT), dispatcher)
+        #--------------------------------------------------------------------------------
+        # Listen on a random UDP port
+        #--------------------------------------------------------------------------------
+        self.server = ThreadingOSCUDPServer((SERIALOSC_HOST, 0), dispatcher)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
+        self.server_port = self.server.socket.getsockname()[1]
 
         self.client = SimpleUDPClient(SERIALOSC_HOST, SERIALOSC_SERVER_PORT)
-        self.client.send_message("/serialosc/list", [SERIALOSC_HOST, SERIALOSC_CLIENT_PORT])
+        self.client.send_message("/serialosc/list", [SERIALOSC_HOST, self.server_port])
         self.available_devices: list[DeviceSpec] = []
 
     def await_devices(self, timeout: float = 0.5):
@@ -70,7 +72,7 @@ class SerialOSC:
                 raise NoDevicesFoundError("No Monome devices were found")
 
     def _serialosc_register(self):
-        self.client.send_message("/serialosc/notify", [SERIALOSC_HOST, SERIALOSC_CLIENT_PORT])
+        self.client.send_message("/serialosc/notify", [SERIALOSC_HOST, self.server_port])
 
     def _osc_handle_unknown_message(self, address, *args):
         logger.warning("SerialOSC: No handler for message: %s %s" % (address, args))

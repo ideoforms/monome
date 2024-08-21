@@ -10,9 +10,6 @@ from .serialosc import SerialOSC
 from .exceptions import NoDevicesFoundError
 
 MONOME_HOST = "127.0.0.1"
-MONOME_CLIENT_PORT = 14001
-
-monome_client_count = 0
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +20,6 @@ class MonomeDevice:
         """
         A generic Monome device.
         """
-        global monome_client_count
-
         self.prefix = prefix
         self.handlers: list[Callable] = []
 
@@ -35,15 +30,11 @@ class MonomeDevice:
         serialosc = SerialOSC()
         serialosc.await_devices()
 
-        self.client_port = MONOME_CLIENT_PORT + monome_client_count
-        monome_client_count = monome_client_count + 1
-
         available_devices = list(filter(lambda device: device.device_model == model_name, serialosc.available_devices))
         try:
             device = available_devices[0]
         except IndexError:
             raise NoDevicesFoundError("No matching monome devices found")
-        server_port = device.port
 
         #--------------------------------------------------------------------------------
         # Set up OSC bindings
@@ -52,12 +43,16 @@ class MonomeDevice:
         self.dispatcher.map(f"/sys/port", self._osc_handle_sys_port)
         self.dispatcher.set_default_handler(self._osc_handle_unknown_message)
 
-        self.server = ThreadingOSCUDPServer((MONOME_HOST, self.client_port), self.dispatcher)
+        #--------------------------------------------------------------------------------
+        # Listen on a random UDP port
+        #--------------------------------------------------------------------------------
+        self.server = ThreadingOSCUDPServer((MONOME_HOST, 0), self.dispatcher)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
+        self.server_port = self.server.socket.getsockname()[1]
 
-        self.client = SimpleUDPClient(MONOME_HOST, server_port)
-        self.client.send_message("/sys/port", [self.client_port])
+        self.client = SimpleUDPClient(MONOME_HOST, device.port)
+        self.client.send_message("/sys/port", [self.server_port])
 
     #--------------------------------------------------------------------------------
     # Handlers
