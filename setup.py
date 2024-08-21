@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name = 'monome',
@@ -11,7 +11,7 @@ setup(
     author = 'Daniel Jones',
     author_email = 'dan-code@erase.net',
     url = 'https://github.com/ideoforms/monome',
-    packages = ['monome'],
+    packages = find_packages(),
     install_requires = ['python-osc', 'singleton-decorator', 'numpy'],
     keywords = ('audio', 'sound', 'music', 'control', 'monome', 'grid', 'arc'),
     classifiers = [
