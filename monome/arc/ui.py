@@ -32,7 +32,7 @@ class ArcUI (Arc):
     def register_ring_class(self, name: str, cls: type):
         self.ring_classes[name] = cls
 
-    def add_page(self, modes: Union[str, list[str]] = "bipolar"):
+    def add_page(self, modes: Union[str, list[str]] = "bipolar") -> ArcPage:
         page = ArcPage(arc=self,
                        modes=modes)
         self.pages.append(page)
@@ -43,7 +43,7 @@ class ArcUI (Arc):
         return page
 
     @property
-    def current_page(self):
+    def current_page(self) -> ArcPage:
         return self.pages[self.current_page_index]
 
     def set_current_page(self, index: int):

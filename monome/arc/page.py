@@ -5,6 +5,8 @@ import logging
 from typing import Union, Callable, TYPE_CHECKING
 if TYPE_CHECKING:
     from .ui import ArcUI
+    from .ring import ArcRing
+
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +27,7 @@ class ArcPage:
                 raise ValueError("Invalid ring mode: %s" % mode)
 
         self.modes = modes
-        self.rings = []
+        self.rings: list[ArcRing] = []
         for index, mode in enumerate(self.modes):
             ring = self.arc.ring_classes[mode](self, index)
             self.rings.append(ring)
