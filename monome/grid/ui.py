@@ -1,7 +1,7 @@
 import time
 import logging
 
-from .page import GridPage, GridPageKeyboard, GridPageScaleMatrix, GridPageButtons
+from .page import GridPage, GridPageKeyboard, GridPageScaleMatrix, GridPageButtons, GridPageFreeform
 from .grid import Grid
 
 logger = logging.getLogger(__name__)
@@ -24,11 +24,12 @@ class GridUI (Grid):
         self.register_page_class("buttons", GridPageButtons)
         self.register_page_class("keyboard", GridPageKeyboard)
         self.register_page_class("scale_matrix", GridPageScaleMatrix)
+        self.register_page_class("freeform", GridPageFreeform)
 
     def register_page_class(self, name: str, cls: type):
         self.page_classes[name] = cls
 
-    def add_page(self, mode: str = "buttons"):
+    def add_page(self, mode: str = "buttons") -> GridPage:
         page = self.page_classes[mode](self)
         self.pages.append(page)
         if len(self.pages) == 1:
@@ -37,7 +38,7 @@ class GridUI (Grid):
         return page
 
     @property
-    def current_page(self):
+    def current_page(self) -> GridPage:
         return self.pages[self.current_page_index]
 
     def set_current_page(self, index: int):
@@ -58,6 +59,3 @@ class GridUI (Grid):
         self.current_page._handle_grid_key(x, y, down)
 
 
-if __name__ == "__main__":
-    while True:
-        time.sleep(1)
