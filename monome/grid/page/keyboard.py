@@ -60,7 +60,6 @@ class GridPageKeyboard (GridPage):
                     self.grid.led_level_set(x, y, self.grid.led_intensity_medium)
 
     def draw(self):
-        self.grid.led_all(0)
         for y in [0, 2, 4]:
             black_keys = (np.array([0, 1, 1, 0, 1, 1, 1]) * self.grid.led_intensity_low).tolist()
             black_keys_row_intensities = black_keys * self.num_octaves_per_row

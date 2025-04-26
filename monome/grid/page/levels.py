@@ -30,9 +30,18 @@ class GridPageHorizontalLevels (GridPage):
                 for handler in self.handlers:
                     handler(self, y, self.levels[y])
                 self.draw()
+    
+    def set_level(self, y: int, level: int):
+        self.levels[y] = level
+        self.draw()
+
+    def set_levels(self, levels: list[int]):
+        if len(levels) != len(self.levels):
+            raise ValueError("Length of levels must match number of levels")
+        self.levels = levels
+        self.draw()
 
     def draw(self):
-        self.grid.led_all(0)
         for index, level in enumerate(self.levels):
             self.grid.led_level_row(0, index, [self.grid.led_intensity_high] * (level + 1) + [self.grid.led_intensity_low] * (self.width - level - 1))
 

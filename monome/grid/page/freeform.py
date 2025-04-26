@@ -121,7 +121,6 @@ class GridPageFreeform (GridPage):
         return wrapper
     
     def draw(self):
-        self.grid.led_level_all(0)
         for y, row in enumerate(self.keys):
             for x, key in enumerate(row):
                 key.draw()

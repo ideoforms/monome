@@ -64,8 +64,6 @@ class GridPageScaleMatrix (GridPage):
                     self.grid.led_level_set(x, y, self.grid.led_intensity_medium)
 
     def draw(self):
-        self.grid.led_all(0)
-
         for row in range(self.matrix_height):
             self.grid.led_level_row(0, (5 - row), self.matrix_rows[row].tolist())
         self.grid.led_level_set(0, self.grid.height - 1, self.grid.led_intensity_medium)

@@ -46,7 +46,11 @@ class GridUI (Grid):
         if not index in list(range(len(self.pages))):
             raise ValueError("Invalid page index: %d" % index)
         self.current_page_index = index
+        self.clear()
         self.draw()
+    
+    def clear(self):
+        self.grid.led_all(0)
     
     def draw(self):
         if len(self.pages) > 0:
@@ -58,5 +62,3 @@ class GridUI (Grid):
         """
         logger.debug("Grid key: %d, %d, %d" % (x, y, down))
         self.current_page._handle_grid_key(x, y, down)
-
-
