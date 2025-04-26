@@ -23,11 +23,11 @@ class ArcRingUnipolar (ArcRing):
         buf = np.roll(buf, self.led_count // 2)
         self.arc.ring_map(self.index, buf)
 
-    def _handle_ring_enc(self, delta: int):
+    def _handle_ring_enc(self, delta: float):
         self.position += delta
         if self.position < 0:
             self.position = 0
         if self.position > self.led_count:
             self.position = self.led_count
-        for handler in self.page.handlers + self.arc.handlers:
-            handler(self.index, self.position, delta)
+        
+        self._call_handlers(self.position, delta)

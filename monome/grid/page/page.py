@@ -11,13 +11,13 @@ logger = logging.getLogger(__name__)
 
 class GridPage:
     def __init__(self,
-                 grid: GridUI,
-                 mode: str = "buttons"):
+                 grid: GridUI):
 
         self.grid = grid
-
-        self.mode = mode
         self.handlers: list[Callable] = []
+    
+    def __str__(self):
+        return str(self.__class__.__name__)
 
     @property
     def width(self):

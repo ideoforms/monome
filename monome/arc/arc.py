@@ -7,11 +7,6 @@ from typing import Callable
 
 from ..device import MonomeDevice
 
-ARC_HOST = "127.0.0.1"
-ARC_CLIENT_PORT = 13001
-
-arc_client_count = 0
-
 logger = logging.getLogger(__name__)
 
 
@@ -22,7 +17,6 @@ class Arc (MonomeDevice):
                  prefix: str = "monome"):
         super().__init__(model_name="arc",
                          prefix=prefix)
-
         self.ring_count = ring_count
         self.led_count = led_count
 

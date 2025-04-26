@@ -5,6 +5,14 @@ class ArcRing:
         self.page = page
         self.index = index
         self.arc = self.page.arc
+        self.position = 0
+
+    def _call_handlers(self, position: float, delta: float):
+        for handler in self.handlers:
+            if self.normalise:
+                handler(self, position / self.led_count, delta / self.led_count)
+            else:
+                handler(self, position, delta)
 
     @property
     def ring_count(self):
@@ -21,3 +29,15 @@ class ArcRing:
     @property
     def led_intensity_cursor(self):
         return self.page.led_intensity_cursor
+
+    @property
+    def sensitivity(self):
+        return self.page.sensitivity
+
+    @property
+    def normalise(self):
+        return self.page.normalise
+    
+    @property
+    def handlers(self):
+        return self.page.handlers + self.arc.handlers

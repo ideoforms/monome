@@ -13,9 +13,8 @@ logger = logging.getLogger(__name__)
 
 class GridPageScaleMatrix (GridPage):
     def __init__(self,
-                 grid: GridUI,
-                 mode: str = "scale_matrix"):
-        super().__init__(grid, mode)
+                 grid: GridUI):
+        super().__init__(grid)
 
         from isobar import Scale
 

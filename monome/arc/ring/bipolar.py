@@ -21,8 +21,7 @@ class ArcRingBipolar (ArcRing):
         buf[position % self.led_count] = self.led_intensity_cursor
         self.arc.ring_map(self.index, buf)
 
-    def _handle_ring_enc(self, delta: int):
+    def _handle_ring_enc(self, delta: float):
         self.position += delta
 
-        for handler in self.page.handlers + self.arc.handlers:
-            handler(self.index, self.position, delta)
+        self._call_handlers(self.position, delta)

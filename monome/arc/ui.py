@@ -1,6 +1,6 @@
 import logging
 
-from typing import Union
+from typing import Union, Optional, Callable
 from .page import ArcPage
 from .arc import Arc
 
@@ -11,7 +11,8 @@ class ArcUI (Arc):
     def __init__(self,
                  ring_count: int = 4,
                  led_count: int = 64,
-                 sensitivity: float = 1.0):
+                 sensitivity: float = 1.0,
+                 normalise: bool = False):
         super().__init__(ring_count, led_count)
 
         #--------------------------------------------------------------------------------
@@ -20,6 +21,7 @@ class ArcUI (Arc):
         self.pages: list[ArcPage] = []
         self.current_page_index = -1
         self._sensitivity = sensitivity
+        self._normalise = normalise
 
         from .ring import ArcRingBipolar, ArcRingAngular, ArcRingUnipolar, ArcRingReel
 
@@ -32,11 +34,17 @@ class ArcUI (Arc):
     def register_ring_class(self, name: str, cls: type):
         self.ring_classes[name] = cls
 
-    def add_page(self, modes: Union[str, list[str]] = "bipolar") -> ArcPage:
+    def add_page(self,
+                 modes: Union[str, list[str]] = "bipolar",
+                 handler: Optional[Callable] = None) -> ArcPage:
         page = ArcPage(arc=self,
+                       index=len(self.pages),
                        modes=modes)
         self.pages.append(page)
+        if handler:
+            page.add_handler(handler)
         page.sensitivity = self.sensitivity
+        page.normalise = self._normalise
         if len(self.pages) == 1:
             self.current_page_index = 0
             self.draw()
@@ -61,6 +69,16 @@ class ArcUI (Arc):
             page.sensitivity = sensitivity
 
     sensitivity = property(get_sensitivity, set_sensitivity)
+
+    def get_normalise(self):
+        return self._normalise
+
+    def set_normalise(self, normalise: bool):
+        self._normalise = normalise
+        for page in self.pages:
+            page.normalise = normalise
+
+    normalise = property(get_normalise, set_normalise)
 
     def draw(self):
         if len(self.pages) > 0:

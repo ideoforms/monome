@@ -13,9 +13,8 @@ logger = logging.getLogger(__name__)
 
 class GridPageKeyboard (GridPage):
     def __init__(self,
-                 grid: GridUI,
-                 mode: str = "buttons"):
-        super().__init__(grid, mode)
+                 grid: GridUI):
+        super().__init__(grid)
 
         self.octave: int = 2
         self.num_octaves_per_row = self.width // 8

@@ -1,7 +1,7 @@
 import time
 import logging
 
-from .page import GridPage, GridPageKeyboard, GridPageScaleMatrix, GridPageButtons, GridPageFreeform
+from .page import GridPage, GridPageKeyboard, GridPageScaleMatrix, GridPageButtons, GridPageFreeform, GridPageHorizontalLevels
 from .grid import Grid
 
 logger = logging.getLogger(__name__)
@@ -18,19 +18,20 @@ class GridUI (Grid):
 
         self.led_intensity_high = 15
         self.led_intensity_medium = 10
-        self.led_intensity_low = 5
+        self.led_intensity_low = 3
 
         self.page_classes = {}
         self.register_page_class("buttons", GridPageButtons)
         self.register_page_class("keyboard", GridPageKeyboard)
         self.register_page_class("scale_matrix", GridPageScaleMatrix)
         self.register_page_class("freeform", GridPageFreeform)
+        self.register_page_class("levels", GridPageHorizontalLevels)
 
     def register_page_class(self, name: str, cls: type):
         self.page_classes[name] = cls
 
-    def add_page(self, mode: str = "buttons") -> GridPage:
-        page = self.page_classes[mode](self)
+    def add_page(self, mode: str = "buttons", **kwargs) -> GridPage:
+        page = self.page_classes[mode](self, **kwargs)
         self.pages.append(page)
         if len(self.pages) == 1:
             self.current_page_index = 0

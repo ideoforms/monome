@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 shared_arc = None
 
+# TODO: Throw an error when two ArcControls use the same ring
 class ArcControl(Patch):
     def __init__(self,
                  ring: int,

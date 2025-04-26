@@ -8,6 +8,10 @@ class ArcRingAngular (ArcRing):
         super().__init__(page, index)
         self.position = 0
 
+    @property
+    def normalise(self):
+        return False
+
     def draw(self):
         position = round_to_integer(self.position)
         
@@ -15,10 +19,9 @@ class ArcRingAngular (ArcRing):
         display[position] = self.led_intensity_cursor
         self.arc.ring_map(self.index, display)
 
-    def _handle_ring_enc(self, delta: int):
+    def _handle_ring_enc(self, delta: float):
         self.position = (self.position + delta) % self.led_count
         delta_radians = (np.pi * 2) * (delta / self.led_count)
         angle_radians = (np.pi * 2) * (self.position / self.led_count)
         
-        for handler in self.page.handlers + self.arc.handlers:
-            handler(self.index, angle_radians, delta_radians)
+        self._call_handlers(angle_radians, delta_radians)

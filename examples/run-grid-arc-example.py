@@ -23,9 +23,9 @@ if __name__ == "__main__":
     #--------------------------------------------------------------------------------
     @arcui.handler
     def _(ring, position, delta):
-        level = position // 4
+        level = int(round(position)) // 4
         row_map = ([8] * level) + ([0] * (grid.width - level))
-        grid.led_level_row(0, ring, row_map)
+        grid.led_level_row(0, ring.index, row_map)
 
     #--------------------------------------------------------------------------------
     # ...and vice versa.
@@ -33,8 +33,9 @@ if __name__ == "__main__":
     @grid.handler
     def _(x, y, on):
         if y < page.ring_count and on:
-            level = x * 4
-            page.set_position(y, level)
+            level = (x + 1) * 4
+            page.rings[y].position = level
+            page.draw()
             
             row_map = ([8] * (x + 1)) + ([0] * (grid.width - (x + 1)))
             grid.led_level_row(0, y, row_map)

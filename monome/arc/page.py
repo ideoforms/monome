@@ -14,9 +14,11 @@ logger = logging.getLogger(__name__)
 class ArcPage:
     def __init__(self,
                  arc: ArcUI,
+                 index: int = 0,
                  modes: Union[str, list[str]] = "bipolar"):
 
         self.arc = arc
+        self.index = index
         if isinstance(modes, str):
             modes = [modes] * self.arc.ring_count
         if len(modes) != self.arc.ring_count:
@@ -33,6 +35,7 @@ class ArcPage:
             self.rings.append(ring)
 
         self.sensitivity = 1.0
+        self.normalise = False
         self.handlers: list[Callable] = []
 
         self.led_intensity_fill = 4
@@ -48,6 +51,12 @@ class ArcPage:
 
     def add_handler(self, callback: Callable):
         self.handlers.append(callback)
+    
+    def remove_handler(self, callback: Callable):
+        if callback in self.handlers:
+            self.handlers.remove(callback)
+        else:
+            raise ValueError("Handler not found in page handlers")
 
     # Synonym to enable @arcpage.handler decorator
     handler = add_handler
@@ -61,9 +70,8 @@ class ArcPage:
         return wrapper
 
     def _handle_ring_enc(self, ring: int, delta: int):
-        logger.debug("Enc delta: %d, %s" % (ring, delta))
+        logger.debug("Ring encoder delta: %d, %s" % (ring, delta))
         delta = delta * self.sensitivity
-        # delta = int(math.ceil(delta) if delta > 0 else math.floor(delta))
 
         self.rings[ring]._handle_ring_enc(delta)
 

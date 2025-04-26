@@ -13,9 +13,8 @@ logger = logging.getLogger(__name__)
 
 class GridPageButtons (GridPage):
     def __init__(self,
-                 grid: GridUI,
-                 mode: str = "buttons"):
-        super().__init__(grid, mode)
+                 grid: GridUI):
+        super().__init__(grid)
 
         self.key_down_handlers = [[None] * grid.width for _ in range(grid.height)]
         self.key_up_handlers = [[None] * grid.width for _ in range(grid.height)]

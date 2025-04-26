@@ -8,18 +8,30 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable
 if TYPE_CHECKING:
     from ..ui import GridUI
+    from ...grid import Grid
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class GridKey:
+    grid: Grid
     x: int
     y: int
     mode: str = None
     state: int = 0
     handler: Callable = None
     group: GridControlGroup = None
+
+    def draw(self):
+        if self.mode is None:
+            pass
+        elif self.mode == "momentary":
+            self.grid.led_level_set(self.x, self.y, self.grid.led_intensity_low)
+        elif self.mode == "toggle":
+            self.grid.led_level_set(self.x, self.y, self.grid.led_intensity_high if self.state else self.grid.led_intensity_low)
+        elif self.mode == "radio":
+            self.grid.led_level_set(self.x, self.y, self.grid.led_intensity_high if self.state else self.grid.led_intensity_low)
 
 @dataclass
 class GridControlGroup:
@@ -41,11 +53,10 @@ class GridKeyRadioEvent(GridKeyEvent):
 
 class GridPageFreeform (GridPage):
     def __init__(self,
-                 grid: GridUI,
-                 mode: str = "freeform"):
-        super().__init__(grid, mode)
+                 grid: GridUI):
+        super().__init__(grid)
 
-        self.keys = [[GridKey(x, y) for x in range(grid.width)] for y in range(grid.height)]
+        self.keys = [[GridKey(grid, x, y) for x in range(grid.width)] for y in range(grid.height)]
         self.control_groups = []
     
     def _handle_grid_key(self, x: int, y: int, down: int):
@@ -92,6 +103,16 @@ class GridPageFreeform (GridPage):
         key.group = group
         if group:
             group.controls.append(key)
+            if len(group.controls) == 1:
+                key.state = 1
+        self.draw()
+    
+    def remove_control_for_key(self, x: int, y: int):
+        key = self.keys[y][x]
+        key.mode = None
+        key.handler = None
+        key.group = None
+        self.draw()
 
     # To enable @control_for_key decorator
     def control_for_key(self, mode: str, x: int, y: int):
@@ -103,8 +124,7 @@ class GridPageFreeform (GridPage):
         self.grid.led_level_all(0)
         for y, row in enumerate(self.keys):
             for x, key in enumerate(row):
-                if key.mode != None:
-                    self.grid.led_level_set(x, y, self.grid.led_intensity_low)
+                key.draw()
     
     def add_control_group(self):
         control_group = GridControlGroup(len(self.control_groups), [])
@@ -122,12 +142,13 @@ if __name__ == "__main__":
     page.add_control_for_key("momentary", 3, 0, lambda event: print("down" if event.down else "up"))
     page.add_control_for_key("momentary", 4, 0, lambda event: print("down" if event.down else "up"))
 
-    radio_group = page.add_control_group()
-    page.add_control_for_key("radio", 0, 2, lambda event: print("group: %d" % event.selected_index), group=radio_group)
-    page.add_control_for_key("radio", 1, 2, lambda event: print("group: %d" % event.selected_index), group=radio_group)
-    page.add_control_for_key("radio", 2, 2, lambda event: print("group: %d" % event.selected_index), group=radio_group)
+    def radio_button_selected(event):
+        print("selected: %d" % event.selected_index)
 
-    page.draw()
+    radio_group = page.add_control_group()
+    page.add_control_for_key("radio", 0, 2, radio_button_selected, group=radio_group)
+    page.add_control_for_key("radio", 1, 2, radio_button_selected, group=radio_group)
+    page.add_control_for_key("radio", 2, 2, radio_button_selected, group=radio_group)
     
     while True:
         time.sleep(1)
