@@ -69,13 +69,16 @@ class ArcPage:
             self.add_handler(ring_handler)
         return wrapper
 
-    def _handle_ring_enc(self, ring: int, delta: int):
+    def _handle_enc_delta(self, ring: int, delta: int):
         logger.debug("Ring encoder delta: %d, %s" % (ring, delta))
         delta = delta * self.sensitivity
 
-        self.rings[ring]._handle_ring_enc(delta)
+        self.rings[ring]._handle_enc_delta(delta)
 
         self.draw_ring(ring)
+    
+    def _handle_enc_key(self, key: int, down: int):
+        logger.debug("Ring encoder key: %d, %d" % (key, down))
 
     def draw(self):
         for ring in range(self.ring_count):

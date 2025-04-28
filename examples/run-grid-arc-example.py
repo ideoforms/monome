@@ -11,11 +11,13 @@ if __name__ == "__main__":
     #--------------------------------------------------------------------------------
     # Initialise and clear both displays.
     #--------------------------------------------------------------------------------
-    gridui = GridUI()
-    gridpage = gridui.add_page("levels", num_levels=4)
-
     arcui = ArcUI()
     arcpage = arcui.add_page("unipolar")
+
+    gridui = GridUI()
+    gridpage = gridui.add_page("levels_horizontal", num_levels=arcui.ring_count)
+
+    scale_factor = arcui.led_count // gridui.width
 
     #--------------------------------------------------------------------------------
     # When an Arc ring is turned, display the same level on the corresponding row
@@ -23,7 +25,7 @@ if __name__ == "__main__":
     #--------------------------------------------------------------------------------
     @arcpage.handler
     def _(ring, position, delta):
-        level = int(round(position)) // 4
+        level = int(round(position)) // scale_factor
         gridpage.set_level(ring.index, level)
 
     #--------------------------------------------------------------------------------
@@ -31,9 +33,9 @@ if __name__ == "__main__":
     #--------------------------------------------------------------------------------
     @gridpage.handler
     def _(page, y, x):
-        level = (x + 1) * 4
+        level = (x + 1) * scale_factor
         arcpage.rings[y].position = level
-        arcpage.draw()        
+        arcpage.draw()   
 
     while True:
         time.sleep(1)

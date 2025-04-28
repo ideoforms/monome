@@ -5,13 +5,12 @@ from ...utils import round_to_integer
 class ArcRingReel (ArcRing):
     def __init__(self, page: ArcPage, index: int):
         super().__init__(page, index)
-        self.position = 0
 
     def draw(self):
         if self.arc.current_page != self.page:
             return
         
-        position = round_to_integer(self.position)
+        position = round_to_integer(self._position)
 
         quarter_offset = self.led_count // 3
         display = [0] * self.led_count
@@ -20,7 +19,7 @@ class ArcRingReel (ArcRing):
         display[(position + 2 * quarter_offset) % self.led_count] = self.led_intensity_cursor
         self.arc.ring_map(self.index, display)
 
-    def _handle_ring_enc(self, delta: float):
-        self.position = (self.position + delta) % self.led_count
+    def _handle_enc_delta(self, delta: float):
+        self._position = (self._position + delta) % self.led_count
         
-        self._call_handlers(self.position, delta)
+        self._call_handlers(self._position, delta)

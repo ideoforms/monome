@@ -4,12 +4,8 @@ from ...utils import round_to_integer
 import math
 
 class ArcRingBipolar (ArcRing):
-    def __init__(self, page: ArcPage, index: int):
-        super().__init__(page, index)
-        self.position = 0
-
     def draw(self):
-        position = round_to_integer(self.position)
+        position = round_to_integer(self._position)
         
         ones = int(math.fabs(position))
         ones = min(ones, self.led_count)
@@ -21,7 +17,7 @@ class ArcRingBipolar (ArcRing):
         buf[position % self.led_count] = self.led_intensity_cursor
         self.arc.ring_map(self.index, buf)
 
-    def _handle_ring_enc(self, delta: float):
-        self.position += delta
+    def _handle_enc_delta(self, delta: float):
+        self._position += delta
 
-        self._call_handlers(self.position, delta)
+        self._call_handlers(self._position, delta)

@@ -66,6 +66,17 @@ class MonomeDevice:
             handler (Callable): A function that is called when an event is received.
         """
         self.handlers.append(handler)
+    
+    def remove_handler(self, handler: Callable):
+        """
+        Remove an event handler.
+
+        Args:
+            handler (Callable): A function that is called when an event is received.
+        """
+        if handler not in self.handlers:
+            raise ValueError("Handler not found")
+        self.handlers.remove(handler)
 
     def handler(self, handler: Callable):
         """

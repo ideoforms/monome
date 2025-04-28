@@ -32,12 +32,17 @@ class GridPageHorizontalLevels (GridPage):
                 self.draw()
     
     def set_level(self, y: int, level: int):
+        if level < 0 or level >= self.width:
+            raise ValueError("Level must be between 0 and width-1")
         self.levels[y] = level
         self.draw()
 
     def set_levels(self, levels: list[int]):
         if len(levels) != len(self.levels):
             raise ValueError("Length of levels must match number of levels")
+        for level in levels:
+            if level < 0 or level >= self.width:
+                raise ValueError("Level must be between 0 and width-1")
         self.levels = levels
         self.draw()
 

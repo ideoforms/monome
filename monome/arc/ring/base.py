@@ -5,7 +5,7 @@ class ArcRing:
         self.page = page
         self.index = index
         self.arc = self.page.arc
-        self.position = 0
+        self._position = 0
 
     def _call_handlers(self, position: float, delta: float):
         for handler in self.handlers:
@@ -13,6 +13,14 @@ class ArcRing:
                 handler(self, position / self.led_count, delta / self.led_count)
             else:
                 handler(self, position, delta)
+
+    def get_position(self):
+        return self._position
+    
+    def set_position(self, position: float):
+        self._position = position
+    
+    position = property(get_position, set_position)
 
     @property
     def ring_count(self):

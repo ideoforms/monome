@@ -7,10 +7,9 @@ import numpy as np
 class ArcRingUnipolar (ArcRing):
     def __init__(self, page: ArcPage, index: int):
         super().__init__(page, index)
-        self.position = 0
 
     def draw(self):
-        position = round_to_integer(self.position)
+        position = round_to_integer(self._position)
 
         ones = int(math.fabs(position))
         ones = min(ones, self.led_count)
@@ -23,11 +22,11 @@ class ArcRingUnipolar (ArcRing):
         buf = np.roll(buf, self.led_count // 2)
         self.arc.ring_map(self.index, buf)
 
-    def _handle_ring_enc(self, delta: float):
-        self.position += delta
-        if self.position < 0:
-            self.position = 0
-        if self.position > self.led_count:
-            self.position = self.led_count
+    def _handle_enc_delta(self, delta: float):
+        self._position += delta
+        if self._position < 0:
+            self._position = 0
+        if self._position > self.led_count:
+            self._position = self.led_count
         
-        self._call_handlers(self.position, delta)
+        self._call_handlers(self._position, delta)

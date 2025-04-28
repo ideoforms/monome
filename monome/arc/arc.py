@@ -19,11 +19,13 @@ class Arc (MonomeDevice):
                          prefix=prefix)
         self.ring_count = ring_count
         self.led_count = led_count
+        self.key_handlers: list[Callable] = []
 
         #--------------------------------------------------------------------------------
         # Set up OSC bindings
         #--------------------------------------------------------------------------------
-        self.dispatcher.map(f"/{self.prefix}/enc/delta", self._osc_handle_ring_enc)
+        self.dispatcher.map(f"/{self.prefix}/enc/delta", self._osc_handle_enc_delta)
+        self.dispatcher.map(f"/{self.prefix}/enc/key", self._osc_handle_enc_key)
 
     #--------------------------------------------------------------------------------
     # Public methods
@@ -102,20 +104,53 @@ class Arc (MonomeDevice):
     # Handlers
     #--------------------------------------------------------------------------------
 
-    def add_handler(self, handler: Callable):
+    def add_ring_handler(self, handler: Callable):
         """
-        Add a handler to receive events from the Arc.
+        Add a handler to receive ring rotation events from the Arc.
 
         Args:
             handler (Callable): A function that is called when a rotation event is detected.
                                 Must have the signature: method(ring: int, delta: int)
         """
         super().add_handler(handler)
+    
+    def ring_handler(self, handler: Callable):
+        """
+        Used for the @device.ring_handler decorator.
 
-    def _osc_handle_ring_enc(self, address: str, ring: int, delta: int):
-        logger.debug("Ring encoder event received: ring %d, delta %d" % (ring, delta))
+        Args:
+            handler (callable): The handler to add.
+        """
+        self.add_handler(handler)
+
+    def add_key_handler(self, handler: Callable):
+        """
+        Add a handler to receive keypress events from the Arc.
+
+        Args:
+            handler (Callable): A function that is called when a rotation event is detected.
+                                Must have the signature: method(key: int, down: int)
+        """
+        self.key_handlers.append(handler)
+    
+    def key_handler(self, handler: Callable):
+        """
+        Used for the @device.key_handler decorator.
+
+        Args:
+            handler (callable): The handler to add.
+        """
+        self.add_key_handler(handler)
+
+    def _osc_handle_enc_delta(self, address: str, ring: int, delta: int):
+        logger.debug("Ring encoder delta event received: ring %d, delta %d" % (ring, delta))
         for handler in self.handlers:
             handler(ring, delta)
+
+    def _osc_handle_enc_key(self, address: str, key: int, down: int):
+        logger.debug("Ring encoder key received: key %d, down %d" % (key, down))
+        for handler in self.key_handlers:
+            handler(key, down)
 
 
 if __name__ == "__main__":
@@ -133,6 +168,12 @@ if __name__ == "__main__":
         zeros = [0] * (arc.led_count - delta_abs)
         display = (ones + zeros) if delta > 0 else (zeros + ones)
         arc.ring_map(ring, display)
+    
+    @arc.key_handler
+    def arc_key_handler(key, down):
+        print("Handling event: key = %d, down = %d" % (key, down))
+
+    print("Listening for events...")
 
     while True:
         time.sleep(1)

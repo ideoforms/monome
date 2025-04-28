@@ -87,12 +87,21 @@ class ArcUI (Arc):
     def draw_ring(self, ring):
         self.current_page.draw_ring(ring)
 
-    def _osc_handle_ring_enc(self, address: str, ring: int, delta: int):
+    def _osc_handle_enc_delta(self, address: str, ring: int, delta: int):
         """
         Override the default OSC handler, and forward it to the current page.
         """
         logger.debug("Ring encoder delta: %d, %s" % (ring, delta))
-        self.current_page._handle_ring_enc(ring, delta)
+        self.current_page._handle_enc_delta(ring, delta)
+    
+    def _osc_handle_enc_key(self, address: str, key: int, down: int):
+        """
+        Override the default OSC handler, and forward it to the current page.
+        """
+        logger.debug("Ring encoder key: %d, %s" % (key, down))
+        self.current_page._handle_enc_key(key, down)
+        for handler in self.key_handlers:
+            handler(key, down)
 
 
 if __name__ == "__main__":
