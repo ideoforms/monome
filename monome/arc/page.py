@@ -61,14 +61,6 @@ class ArcPage:
     # Synonym to enable @arcpage.handler decorator
     handler = add_handler
 
-    def handler_for_ring(self, ring: int = None):
-        def wrapper(callback):
-            def ring_handler(event_ring, position, delta):
-                if ring is None or ring == event_ring:
-                    callback(ring, position, delta)
-            self.add_handler(ring_handler)
-        return wrapper
-
     def _handle_enc_delta(self, ring: int, delta: int):
         logger.debug("Ring encoder delta: %d, %s" % (ring, delta))
         delta = delta * self.sensitivity

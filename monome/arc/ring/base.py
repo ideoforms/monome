@@ -8,7 +8,7 @@ class ArcRing:
         self._position = 0
 
     def _call_handlers(self, position: float, delta: float):
-        for handler in self.handlers:
+        for handler in self.handlers + self.page.handlers:
             if self.normalise:
                 handler(self, position / self.led_count, delta / self.led_count)
             else:
