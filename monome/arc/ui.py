@@ -98,10 +98,13 @@ class ArcUI (Arc):
         """
         Override the default OSC handler, and forward it to the current page.
         """
+        from .event import ArcKeyEvent
+
         logger.debug("Ring encoder key: %d, %s" % (key, down))
         self.current_page._handle_enc_key(key, down)
+        event = ArcKeyEvent(key, down)
         for handler in self.key_handlers:
-            handler(key, down)
+            handler(event)
 
 
 if __name__ == "__main__":
@@ -113,20 +116,20 @@ if __name__ == "__main__":
     arcui_reel.sensitivity = 0.1
 
     @arcui.handler
-    def _(ring, position, delta):
-        print("Handler: ring = %d, position = %f, delta = %f" % (ring, position, delta))
+    def _(event):
+        print("Handler: ring = %d, position = %f, delta = %f" % (event.ring.index, event.position, event.delta))
 
     @arcui_bi.handler
-    def _(ring, position, delta):
-        print("Bipolar handler: ring = %d, position = %f, delta = %f" % (ring, position, delta))
+    def _(event):
+        print("Bipolar handler: ring = %d, position = %f, delta = %f" % (event.ring.index, event.position, event.delta))
 
     @arcui_uni.handler
-    def _(ring, position, delta):
-        print("Unipolar handler: ring = %d, position = %f, delta = %f" % (ring, position, delta))
+    def _(event):
+        print("Unipolar handler: ring = %d, position = %f, delta = %f" % (event.ring.index, event.position, event.delta))
 
     @arcui_ang.handler
-    def _(ring, position, delta):
-        print("Angular handler: ring = %d, position = %f, delta = %f" % (ring, position, delta))
+    def _(event):
+        print("Angular handler: ring = %d, position = %f, delta = %f" % (event.ring.index, event.position, event.delta))
 
     import threading, time
     def runloop():

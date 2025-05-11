@@ -25,21 +25,21 @@ def main(output_device=None,
     midi = mido.open_output(output_device) 
     arcui = ArcUI(sensitivity=0.5, normalise=True)
 
-    def page_handler(ring, position, delta):
-        cc = ring.index + (ring.page.index * arcui.ring_count)
-        value = int(position * 127)
+    def ring_handler(event):
+        cc = event.ring.index + (event.ring.page.index * arcui.ring_count)
+        value = int(event.position * 127)
         print(f"Sending CC {cc} with value {value}")
         midi.send(mido.Message('control_change', channel=0, control=cc, value=value))
     
     for _ in range(4):
-        arcui.add_page(modes="unipolar", handler=page_handler)
+        arcui.add_page(modes="unipolar", handler=ring_handler)
     
-    def change_tab(key, down):
-        if down:
+    def key_handler(event):
+        if event.down:
             page_index = (arcui.current_page_index + 1) % len(arcui.pages)
             print("Changing page: %d" % page_index)
             arcui.set_current_page(page_index)
-    arcui.add_key_handler(change_tab)
+    arcui.add_key_handler(key_handler)
 
     while True:
         page_index = int(input("Enter page index (0-3): "))

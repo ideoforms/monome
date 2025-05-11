@@ -6,6 +6,7 @@ import math
 from typing import Callable
 
 from ..device import MonomeDevice
+from .event import ArcRotationEvent, ArcKeyEvent
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,15 @@ class Arc (MonomeDevice):
                  ring_count: int = 4,
                  led_count: int = 64,
                  prefix: str = "monome"):
+        """
+        Low-level interface to a Monome Arc device.
+        This class exposes the identical set of APIs as implemented in serialosc.
+
+        Args:
+            ring_count (int, optional): The number of rings on the Arc. Defaults to 4.
+            led_count (int, optional): The number of LEDs per ring. Defaults to 64.
+            prefix (str, optional): The address prefix for serialosc. Defaults to "monome".
+        """
         super().__init__(model_name="arc",
                          prefix=prefix)
         self.ring_count = ring_count
@@ -144,13 +154,15 @@ class Arc (MonomeDevice):
 
     def _osc_handle_enc_delta(self, address: str, ring: int, delta: int):
         logger.debug("Ring encoder delta event received: ring %d, delta %d" % (ring, delta))
+        event = ArcRotationEvent(ring, delta)
         for handler in self.handlers:
-            handler(ring, delta)
+            handler(event)
 
     def _osc_handle_enc_key(self, address: str, key: int, down: int):
         logger.debug("Ring encoder key received: key %d, down %d" % (key, down))
+        event = ArcKeyEvent(key, down)
         for handler in self.key_handlers:
-            handler(key, down)
+            handler(event)
 
 
 if __name__ == "__main__":
@@ -160,18 +172,18 @@ if __name__ == "__main__":
         arc.ring_all(ring, 0)
 
     @arc.handler
-    def arc_handler(ring, delta):
-        print("Handling event: ring = %d, delta = %d" % (ring, delta))
-        delta_abs = int(math.fabs(delta))
+    def arc_handler(event):
+        print("Handling event: ring = %d, delta = %d" % (event.ring, event.delta))
+        delta_abs = int(math.fabs(event.delta))
         delta_abs = max(-arc.led_count, min(arc.led_count, delta_abs))
         ones = [15] * delta_abs
         zeros = [0] * (arc.led_count - delta_abs)
-        display = (ones + zeros) if delta > 0 else (zeros + ones)
-        arc.ring_map(ring, display)
+        display = (ones + zeros) if event.delta > 0 else (zeros + ones)
+        arc.ring_map(event.ring, display)
     
     @arc.key_handler
-    def arc_key_handler(key, down):
-        print("Handling event: key = %d, down = %d" % (key, down))
+    def arc_key_handler(event):
+        print("Handling event: key = %d, down = %d" % (event.key, event.down))
 
     print("Listening for events...")
 

@@ -9,8 +9,7 @@ class ArcRingAngular (ArcRing):
         return False
 
     def draw(self):
-        position = round_to_integer(self.position)
-        
+        position = round_to_integer(self.position) % self.led_count        
         display = [0] * self.led_count
         display[position] = self.led_intensity_cursor
         self.arc.ring_map(self.index, display)

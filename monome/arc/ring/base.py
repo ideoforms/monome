@@ -8,11 +8,13 @@ class ArcRing:
         self._position = 0
 
     def _call_handlers(self, position: float, delta: float):
+        from ..event import ArcUIRotationEvent
         for handler in self.handlers + self.page.handlers:
             if self.normalise:
-                handler(self, position / self.led_count, delta / self.led_count)
+                event = ArcUIRotationEvent(self, position / self.led_count, delta / self.led_count)
             else:
-                handler(self, position, delta)
+                event = ArcUIRotationEvent(self, position, delta)
+            handler(event)
 
     def get_position(self):
         return self._position
