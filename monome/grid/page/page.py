@@ -33,9 +33,7 @@ class GridPage:
     handler = add_handler
 
     def _handle_grid_key(self, x: int, y: int, down: int):
-        logger.debug("Grid key: %d, %d, %s" % (x, y, down))
-        for handler in self.handlers:
-            handler(x, y, down)
+        raise NotImplementedError("Subclasses must implement _handle_grid_key() method")
 
     def draw(self):
-        self.grid.led_all(0)
+        raise NotImplementedError("Subclasses must implement draw() method")

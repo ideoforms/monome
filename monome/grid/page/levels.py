@@ -24,11 +24,14 @@ class GridPageHorizontalLevels (GridPage):
             self.add_handler(handler)
 
     def _handle_grid_key(self, x: int, y: int, down: int):
+        from ..event import GridUIKeyEvent
+
         if down:
             if y < len(self.levels):
                 self.levels[y] = x
+                event = GridUIKeyEvent(self, x, y, down)
                 for handler in self.handlers:
-                    handler(self, y, self.levels[y])
+                    handler(event)
                 self.draw()
     
     def set_level(self, y: int, level: int):
@@ -54,8 +57,8 @@ if __name__ == "__main__":
     from ..ui import GridUI
     import time
 
-    def level_handler(page, y, x):
-        print(f"Level handler: page={page}, y={y}, x={x}")
+    def level_handler(event):
+        print(f"Level handler: page={event.page}, y={event.y}, x={event.x}")
         
     gridui = GridUI()
     page = gridui.add_page(mode="levels",

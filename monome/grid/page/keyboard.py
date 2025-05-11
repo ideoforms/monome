@@ -20,6 +20,8 @@ class GridPageKeyboard (GridPage):
         self.num_octaves_per_row = self.width // 8
 
     def _handle_grid_key(self, x: int, y: int, down: int):
+        from ..event import GridUIMidiNoteEvent
+
         # First 6 rows are the keyboard keys
         if y < 6:
             y_octave_offset = ((5 - y) // 2) * self.num_octaves_per_row
@@ -40,8 +42,9 @@ class GridPageKeyboard (GridPage):
                 self.grid.led_level_set(x, y, self.grid.led_intensity_high)
             else:
                 self.grid.led_level_set(x, y, self.grid.led_intensity_low)
+            event = GridUIMidiNoteEvent(self, x, y, down, note)
             for handler in self.handlers:
-                handler(note, down)
+                handler(event)
 
         # Final row is octave up/down
         elif y == self.grid.height - 1:

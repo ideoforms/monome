@@ -30,6 +30,8 @@ class GridPageScaleMatrix (GridPage):
         self.matrix_rows = np.split(np.array(matrix_sequence), self.matrix_height)
 
     def _handle_grid_key(self, x: int, y: int, down: int):
+        from ..event import GridUIMidiNoteEvent
+
         # First 6 rows are the keyboard keys
         if y < 6 and x < self.matrix_width:
             scale_length_spaced = len(self.scale.semitones) + 1
@@ -45,8 +47,9 @@ class GridPageScaleMatrix (GridPage):
             else:
                 self.grid.led_level_set(x, y, self.grid.led_intensity_low)
 
+            event = GridUIMidiNoteEvent(self, x, y, down, midi_note)
             for handler in self.handlers:
-                handler(midi_note, down)
+                handler(event)
         # Final row is octave up/down
         elif y == self.grid.height - 1:
             if x == 0:
@@ -68,3 +71,17 @@ class GridPageScaleMatrix (GridPage):
             self.grid.led_level_row(0, (5 - row), self.matrix_rows[row].tolist())
         self.grid.led_level_set(0, self.grid.height - 1, self.grid.led_intensity_medium)
         self.grid.led_level_set(self.grid.width - 1, self.grid.height - 1, self.grid.led_intensity_medium)
+
+if __name__ == "__main__":
+    from ..ui import GridUI
+    import time
+        
+    gridui = GridUI()
+    page = gridui.add_page(mode="scale_matrix")
+
+    @page.handler
+    def _(event):
+        print(event.note, event.down)
+    
+    while True:
+        time.sleep(1)

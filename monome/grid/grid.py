@@ -3,6 +3,7 @@ import random
 import time
 
 from ..device import MonomeDevice
+from .event import GridKeyEvent
 
 GRID_HOST = "127.0.0.1"
 GRID_CLIENT_PORT = 14001
@@ -153,8 +154,9 @@ class Grid (MonomeDevice):
 
     def _osc_handle_grid_key(self, address: str, x: int, y: int, down: bool):
         logger.debug("Key press: %d, %d, %d" % (x, y, down))
+        event = GridKeyEvent(x, y, down)
         for handler in self.handlers:
-            handler(x, y, down)
+            handler(event)
 
 
 if __name__ == "__main__":
@@ -162,16 +164,16 @@ if __name__ == "__main__":
     grid.led_level_all(0)
 
     @grid.handler
-    def _(x, y, down):
-        if x == 0:
-            if y == 0:
-                grid.led_level_all(int(down) * 10)
+    def _(event):
+        if event.x == 0:
+            if event.y == 0:
+                grid.led_level_all(int(event.down) * 10)
             else:
-                grid.led_level_row(x, y, list(range(grid.width)) if down else [0] * grid.width)
+                grid.led_level_row(event.x, event.y, list(range(grid.width)) if event.down else [0] * grid.width)
         elif y == 0:
-            grid.led_level_col(x, y, list(range(grid.height)) if down else [0] * grid.height)
+            grid.led_level_col(event.x, event.y, list(range(grid.height)) if event.down else [0] * grid.height)
         else:
-            grid.led_level_set(x, y, int(down) * 10)
+            grid.led_level_set(event.x, event.y, int(event.down) * 10)
 
     while True:
         x = random.randrange(0, grid.width)
