@@ -17,10 +17,16 @@ class ArcRing:
             handler(event)
 
     def get_position(self):
-        return self._position
+        if self.normalise:
+            return self._position / self.led_count
+        else:
+            return self._position
     
     def set_position(self, position: float):
-        self._position = position
+        if self.normalise:
+            self._position = int(position * self.led_count)
+        else:
+            self._position = int(position)
     
     position = property(get_position, set_position)
 
